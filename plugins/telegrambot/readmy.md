@@ -11,47 +11,17 @@
         1. Add class checkout to all your forms in which you want to take data !!! You need to add the class exactly to the form tag: <form class="checkout"></form>
         2. Add class form__title to the tag from which the name of your form will be taken
         3. Your forms should be in your theme's index.php file
-        4. Create a javascript file in your theme and paste this code there, after connecting the file to functions.php of your theme
+        4. paste this code in themes -> functions.php
 ```
-        document.addEventListener('DOMContentLoaded', function() {
-            const forms = document.querySelectorAll('.checkout');
-            
-            forms.forEach(item => {
-                postData(item);
-            })
-            
-            function postData(form){
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const name = form.querySelector('.form__title').textContent;
-
-                    let formName = {'formname' : name};
-                    const formData = new FormData(form);
-            
-                    const object = {};
-                    formData.forEach(function(value, key){
-                        object[key] = value;
-                    });
-                    fetch('/plugins/telegrambot/telegrambot.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({...object, ...formName})
-            
-                    }).then(data => {
-                        console.log(data);
-                    }).catch((data) => {
-                        console.log(data);
-                    }).finally(() => {
-                        form.reset();
-                    });
-                    
-                    
-                });
-            }
-        });
+    <?php
+        function enqueue_telegrambot_script() {
+            $plugin_script_url = plugins_url( 'telegrambot/script.js' );
+     
+            wp_register_script( 'telegrambot-script', $plugin_script_url, array(), '1.0', true );
+            wp_enqueue_script( 'telegrambot-script' );
+        }
+        add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); 
+    ?>
 ```
         
 # 3) Go to wp-admin -> plugin -> the Setting Fields tab, and select which data you want to receive in Telegram. The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything

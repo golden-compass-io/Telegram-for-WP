@@ -51,13 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Возвращаем успешный ответ обратно в JavaScript
         echo json_encode(['success' => true]);
-    } else {
-        // Если не все поля присутствуют в данных, возвращаем ошибку
-        echo json_encode(['error' => 'Not all required fields are provided']);
     }
-} else {
-    // Если запрос не методом POST, возвращаем ошибку
-    // echo json_encode(['error' => 'Invalid request method']);
 }
 
 
