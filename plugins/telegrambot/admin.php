@@ -64,10 +64,8 @@
     }
 
 
-
     // ------для файлов----
 
-   
     function display_php_files_list() {
         $them_folder = get_template_directory();
 
@@ -110,8 +108,6 @@
     add_action('admin_init', 'telegram_bot_plugin_init_settings_file');
     
 
-    
-  
 
 
     // -----------------Для полей ----------
@@ -121,46 +117,53 @@
         // Получаем путь к папке активной темы
         $theme_folder = get_template_directory(); // Или get_stylesheet_directory(), в зависимости от вашего случая
         // Например, если вы хотите получить содержимое файла index.php
-        $file_path = $theme_folder . '/index.php';
+        $selected_php_files = get_option('my_plugin_settings_files', array());
 
-        if (file_exists($file_path)) {
-            $form_html = file_get_contents($file_path);
-            // Теперь у вас есть верстка из выбранной темы, которую вы можете использовать для парсинга.
+        if (empty($selected_php_files)) {
+            $selected_php_files = array('index.php');
+        }
 
-            $dom = new DOMDocument();
-            @$dom->loadHTML($form_html); // Загружаем HTML-код в DOMDocument
+        foreach ($selected_php_files as $php_file) {
+            $file_path = $theme_folder . '/' . $php_file;
 
-            $xpath = new DOMXPath($dom);
-            $forms = $xpath->query("//form[contains(@class, 'checkout')]");
+            if (file_exists($file_path)) {
+                $form_html = file_get_contents($file_path);
+
+                $dom = new DOMDocument();
+                @$dom->loadHTML($form_html);
+
+                $xpath = new DOMXPath($dom);
+                $forms = $xpath->query("//form[contains(@class, 'checkout')]");
 
         
-            foreach ($forms as $form) {
-                    // Получаем заголовок формы с классом .form__title
-                $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
-                if ($title->length > 0) {
-                    $form_name = $title->item(0)->textContent;
-                }
-
-                // Выполняйте дополнительные действия с каждой найденной формой
-                $inputs = $xpath->query(".//input[@name]", $form);
-                foreach ($inputs as $input) {
-                    // Действия с каждым найденным input в форме
-                    $name = $input->getAttribute('name');
-                    $inputData[$form_name][] = $name; // Добавляем атрибуты <input> в массив, сгруппированные по заголовку формы
-                }
-            
-                // Обрабатываем элементы textarea
-                $textareas = $xpath->query(".//textarea[@name]", $form);
-                foreach ($textareas as $textarea) {
-                    // Действия с каждым найденным textarea в форме
-                    $name = $textarea->getAttribute('name');
-                    if (!isset($inputData[$form_name])) {
-                        $inputData[$form_name] = array();
+                foreach ($forms as $form) {
+                        // Получаем заголовок формы с классом .form__title
+                    $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
+                    if ($title->length > 0) {
+                        $form_name = $title->item(0)->textContent;
                     }
-                    $inputData[$form_name][] = $name; // Добавляем атрибуты <textarea> в массив
+
+                    // Выполняйте дополнительные действия с каждой найденной формой
+                    $inputs = $xpath->query(".//input[@name]", $form);
+                    foreach ($inputs as $input) {
+                        // Действия с каждым найденным input в форме
+                        $name = $input->getAttribute('name');
+                        $inputData[$form_name][] = $name; // Добавляем атрибуты <input> в массив, сгруппированные по заголовку формы
+                    }
+                
+                    // Обрабатываем элементы textarea
+                    $textareas = $xpath->query(".//textarea[@name]", $form);
+                    foreach ($textareas as $textarea) {
+                        // Действия с каждым найденным textarea в форме
+                        $name = $textarea->getAttribute('name');
+                        if (!isset($inputData[$form_name])) {
+                            $inputData[$form_name] = array();
+                        }
+                        $inputData[$form_name][] = $name; // Добавляем атрибуты <textarea> в массив
+                    }
                 }
+            } else {
             }
-        } else {
             // Обработка случая, если файл не найден.
         }
 
@@ -185,7 +188,7 @@
     function telegram_bot_plugin_init_settings_field() {
         add_settings_section(
             'telegram_bot_plugin_field_section',
-            'Оберіть, які поля надсилати в Telegram Bot:',
+            'Choose which fields to send to Telegram Bot:',
             'my_plugin_field_settings_callback',
             'telegram_bot_plugin_settings_field'
         );  

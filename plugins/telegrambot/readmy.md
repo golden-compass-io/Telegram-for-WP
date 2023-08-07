@@ -10,9 +10,9 @@
 # 2) To go to the next point you need to do some actions:
         1. Add class checkout to all your forms in which you want to take data !!! You need to add the class exactly to the form tag: <form class="checkout"></form>
         2. Add class form__title to the tag from which the name of your form will be taken
-        3. Your forms should be in your theme's index.php file
-        4. paste this code in themes -> functions.php
-```
+        3. Name attributes of input must be unique
+        4. Paste this code in themes -> functions.php
+```    
     <?php
         function enqueue_telegrambot_script() {
             $plugin_script_url = plugins_url( 'telegrambot/script.js' );
@@ -23,5 +23,5 @@
         add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); 
     ?>
 ```
-        
+# 4) Go to wp-admin -> plugin -> the Setting PHP Files tab, and select what page are your forms on        
 # 3) Go to wp-admin -> plugin -> the Setting Fields tab, and select which data you want to receive in Telegram. The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything
