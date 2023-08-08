@@ -64,24 +64,36 @@
     }
 
 
+
     // ------для файлов----
 
     function display_php_files_list() {
-        $them_folder = get_template_directory();
-
+        $theme_folder = get_template_directory();
         $selected_files = get_option('my_plugin_settings_files', array());
 
         if (empty($selected_files)) {
             $selected_files = array('index.php');
         }
-
-        if ($them_folder) {
+    
+        if ($theme_folder) {
             $php_files = array();
-            $files = scandir($them_folder);
-
+            $files = scandir($theme_folder);
+    
             foreach ($files as $file) {
                 if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-                    $php_files[] = $file;
+                    $file_path = $theme_folder . '/' . $file;
+                    $form_html = file_get_contents($file_path);
+    
+                    $dom = new DOMDocument();
+                    @$dom->loadHTML($form_html);
+    
+                    $xpath = new DOMXPath($dom);
+                    $forms = $xpath->query("//form[contains(@class, 'checkout')]");
+                    
+                    // If form found in the current PHP file, add it to the list
+                    if ($forms->length > 0) {
+                        $php_files[] = $file;
+                    }
                 }
             }
     
@@ -94,6 +106,7 @@
             echo 'Theme folder not found.';
         }
     }
+    
     
     function telegram_bot_plugin_init_settings_file() {
         add_settings_section(
@@ -108,6 +121,8 @@
     add_action('admin_init', 'telegram_bot_plugin_init_settings_file');
     
 
+    
+  
 
 
     // -----------------Для полей ----------
@@ -170,7 +185,7 @@
 
         // Выводим данные input, сгруппированные по заголовку формы
         foreach ($inputData as $form_name => $input_names) {
-            echo '<h2>' . esc_html($form_name) . '</h2>';
+            echo '<h3 style="font-size: 14px;">' . 'Form title: ' . esc_html($form_name) . '</h3>'; 
             foreach ($input_names as $inputName) {
                 // Выводим checkbox для каждого элемента в массиве $input_names
                 ?>
