@@ -65,138 +65,66 @@
 
 
 
-    // ------для файлов----
-
-    function display_php_files_list() {
-        $theme_folder = get_template_directory();
-        $selected_files = get_option('my_plugin_settings_files', array());
-
-        if (empty($selected_files)) {
-            $selected_files = array('index.php');
-        }
-    
-        if ($theme_folder) {
-            $php_files = array();
-            $files = scandir($theme_folder);
-    
-            foreach ($files as $file) {
-                if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-                    $file_path = $theme_folder . '/' . $file;
-                    $form_html = file_get_contents($file_path);
-    
-                    $dom = new DOMDocument();
-                    @$dom->loadHTML($form_html);
-    
-                    $xpath = new DOMXPath($dom);
-                    $forms = $xpath->query("//form[contains(@class, 'checkout')]");
-                    
-                    // If form found in the current PHP file, add it to the list
-                    if ($forms->length > 0) {
-                        $php_files[] = $file;
-                    }
-                }
-            }
-    
-            foreach ($php_files as $php_file) {
-                ?>
-                <input type="checkbox" name="my_plugin_settings_files[]" value="<?php echo esc_attr($php_file); ?>" <?php checked(in_array($php_file, $selected_files)); ?> /> <?php echo esc_html($php_file); ?><br>
-                <?php
-            }
-        } else {
-            echo 'Theme folder not found.';
-        }
-    }
-    
-    
-    function telegram_bot_plugin_init_settings_file() {
-        add_settings_section(
-            'telegram_bot_plugin_file_section',
-            'Select which pages your forms are on',
-            'display_php_files_list',
-            'telegram_bot_plugin_settings_file'
-        );  
-        
-        register_setting('telegram_bot_plugin_settings_file', 'my_plugin_settings_files');
-    }
-    add_action('admin_init', 'telegram_bot_plugin_init_settings_file');
-    
-
-    
-  
-
 
     // -----------------Для полей ----------
 
-    // Функция для обработки атрибутов name и вывода их в административной панели
     function my_plugin_field_settings_callback() {
-        // Получаем путь к папке активной темы
-        $theme_folder = get_template_directory(); // Или get_stylesheet_directory(), в зависимости от вашего случая
-        // Например, если вы хотите получить содержимое файла index.php
-        $selected_php_files = get_option('my_plugin_settings_files', array());
-
-        if (empty($selected_php_files)) {
-            $selected_php_files = array('index.php');
-        }
-
-        foreach ($selected_php_files as $php_file) {
+        $theme_folder = get_template_directory();
+        $selected_fields = get_option('my_plugin_settings_forms', array());
+    
+        $php_files = scandir($theme_folder);
+    
+        foreach ($php_files as $php_file) {
             $file_path = $theme_folder . '/' . $php_file;
-
-            if (file_exists($file_path)) {
+    
+            if (pathinfo($php_file, PATHINFO_EXTENSION) === 'php') {
                 $form_html = file_get_contents($file_path);
-
+    
                 $dom = new DOMDocument();
                 @$dom->loadHTML($form_html);
-
+    
                 $xpath = new DOMXPath($dom);
                 $forms = $xpath->query("//form[contains(@class, 'checkout')]");
-
-        
+    
                 foreach ($forms as $form) {
-                        // Получаем заголовок формы с классом .form__title
                     $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
                     if ($title->length > 0) {
                         $form_name = $title->item(0)->textContent;
                     }
-
-                    // Выполняйте дополнительные действия с каждой найденной формой
+    
+                    $is_form_checked = in_array($form_name, $selected_fields) ? 'checked' : 'checked'; // Додано 'checked' як стан за замовчуванням
+                    ?>
+                    <input style="margin-bottom: 5px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($form_name); ?>" <?php echo $is_form_checked; ?> />
+                    <label style="font-size: 15px; margin-bottom: 10px; display: inline-block;" ><strong><?php echo 'Form: ' . esc_html($form_name); ?></strong></label><br>
+                    <?php
+    
                     $inputs = $xpath->query(".//input[@name]", $form);
                     foreach ($inputs as $input) {
-                        // Действия с каждым найденным input в форме
-                        $name = $input->getAttribute('name');
-                        $inputData[$form_name][] = $name; // Добавляем атрибуты <input> в массив, сгруппированные по заголовку формы
+                        $input_name = $input->getAttribute('name');
+                        $is_input_checked = in_array($input_name, $selected_fields) ? 'checked' : '';
+                        ?>
+                        <input style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                        <?php
                     }
-                
-                    // Обрабатываем элементы textarea
+    
                     $textareas = $xpath->query(".//textarea[@name]", $form);
                     foreach ($textareas as $textarea) {
-                        // Действия с каждым найденным textarea в форме
-                        $name = $textarea->getAttribute('name');
-                        if (!isset($inputData[$form_name])) {
-                            $inputData[$form_name] = array();
-                        }
-                        $inputData[$form_name][] = $name; // Добавляем атрибуты <textarea> в массив
+                        $textarea_name = $textarea->getAttribute('name');
+                        $is_textarea_checked = in_array($textarea_name, $selected_fields) ? 'checked' : '';
+                        ?>
+                        <input style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
+                        <?php
                     }
+                    ?>
+                    <br><br>
+                    <?php
                 }
-            } else {
-            }
-            // Обработка случая, если файл не найден.
-        }
-
-
-        // Выводим данные input, сгруппированные по заголовку формы
-        foreach ($inputData as $form_name => $input_names) {
-            echo '<h3 style="font-size: 14px;">' . 'Form title: ' . esc_html($form_name) . '</h3>'; 
-            foreach ($input_names as $inputName) {
-                // Выводим checkbox для каждого элемента в массиве $input_names
-                ?>
-                <input type="checkbox" name="my_plugin_settings_fields[]" value="<?php echo esc_attr($inputName); ?>" <?php checked(in_array($inputName, get_option('my_plugin_settings_fields', array()))); ?> /> <?php echo esc_html($inputName); ?><br>
-                <?php
+              
+                
             }
         }
-
     }
-
-
+    
 
 
     // // Добавляем настройки поля в раздел Field Settings
@@ -208,9 +136,9 @@
             'telegram_bot_plugin_settings_field'
         );  
           
-        register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_fields');
+        register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_forms');
     }
- add_action('admin_init', 'telegram_bot_plugin_init_settings_field');
+    add_action('admin_init', 'telegram_bot_plugin_init_settings_field');
     
 
 
@@ -223,7 +151,6 @@
             <h1>Telegram Bot Settings</h1>
             <h2 class="nav-tab-wrapper">
                 <a href="#general-settings" class="nav-tab nav-tab-active">Bot Settings</a>
-                <a href="#file-settings" class="nav-tab">Setting PHP Files</a>
                 <a href="#field-settings" class="nav-tab">Setting Fields</a>
             </h2>
     
@@ -239,17 +166,6 @@
             </div>
     
             <!-- Вміст 2 табу - Field Settings -->
-            <div id="file-settings" class="tab-content" style="display:none;">
-                <form method="post" action="options.php">
-                    <?php
-                    settings_fields('telegram_bot_plugin_settings_file');
-                    do_settings_sections('telegram_bot_plugin_settings_file');
-                    ?>
-                    <?php submit_button(); ?>
-                </form>
-            </div>
-
-            <!-- Вміст 3 табу - Field Settings -->
             <div id="field-settings" class="tab-content" style="display:none;">
                 <form method="post" action="options.php">
                     <?php
