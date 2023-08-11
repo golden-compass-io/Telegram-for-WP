@@ -2,7 +2,7 @@
 /* Plugin name: telegram-bot 
 * Description: Підключення телеграм-бота на сайт для отримання замовлень.
 * Version: 1.0
-* Author: Ваше ім'я або назва компанії
+* Author: Golden Compass
 * Author URI: https://example.com
 */
 require_once( plugin_dir_path( __FILE__ ) . 'telegram-admin.php' );

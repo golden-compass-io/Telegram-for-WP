@@ -3,53 +3,58 @@
     // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
-        add_menu_page('Telegram Bot', 'Telegram Bot', 'manage_options', 'telegram_bot_settings', 'telegram_bot_settings_page', 'dashicons-megaphone');
+        add_menu_page('Telegram Bot', 'Telegram Bot', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', 'dashicons-megaphone');
+        add_submenu_page('telegram_bot_settings', 'Telegram Bot Settings', 'Telegram Bot Settings', 'manage_options', 'telegram_bot_general_settings', 'telegram_bot_settings_general_page');
+        add_submenu_page('telegram_bot_settings', 'Setting Forms and Fields', 'Setting Forms and Fields', 'manage_options', 'telegram_bot_field_settings', 'telegram_bot_field_settings_page');
     }
+    
 
     // функція зворотного визову для сторінки налаштувань плагіна:
     function telegram_bot_plugin_settings_callback() {
         ?>
         <div class="wrap">
-            <h1>Settings</h1>
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('telegram_bot_plugin_settings');
-                do_settings_sections('telegram_bot_plugin_settings');
-                submit_button();
-                ?>
-            </form>
+            <h1>Readmy</h1>
+            
         </div>
         <?php
     }
+
 
     // -----------------Для токена та ID ----------
     // Додайте поля для введення токена та ID чату на сторінці налаштувань:
     function telegram_bot_plugin_init_settings_general() {
         add_settings_section(
-            'telegram_bot_plugin_general_section',
-            '',
-            '',
-            'telegram_bot_plugin_settings_general'
+            'telegram_bot_settings_general_section', // Ідентифікатор секції
+            'Еnter the data',
+            '', // Функція зворотного виклику для виводу опису секції (можна залишити порожньою)
+            'telegram_bot_plugin_settings_general' // Ідентифікатор сторінки
+        );
+    
+        // Додавання полів
+        add_settings_field(
+            'telegram_bot_token', // Ідентифікатор поля
+            'Telegram Bot Token', // Назва поля
+            'telegram_bot_token_callback', // Функція зворотного виклику для виводу поля
+            'telegram_bot_plugin_settings_general', // Ідентифікатор сторінки
+            'telegram_bot_settings_general_section' // Ідентифікатор секції
         );
     
         add_settings_field(
-            'telegram_bot_token',
-            'Telegram Bot Token',
-            'telegram_bot_token_callback',
-            'telegram_bot_plugin_settings_general',
-            'telegram_bot_plugin_general_section'
+            'telegram_chat_id', // Ідентифікатор поля
+            'Telegram Chat ID', // Назва поля
+            'telegram_chat_id_callback', // Функція зворотного виклику для виводу поля
+            'telegram_bot_plugin_settings_general', // Ідентифікатор сторінки
+            'telegram_bot_settings_general_section' // Ідентифікатор секції
         );
     
-        add_settings_field(
-            'telegram_chat_id',
-            'Telegram Chat ID',
-            'telegram_chat_id_callback',
-            'telegram_bot_plugin_settings_general',
-            'telegram_bot_plugin_general_section'
+        register_setting(
+            'telegram_bot_plugin_settings_general', // Ідентифікатор групи налаштувань
+            'telegram_bot_token' // Ідентифікатор поля
         );
-    
-        register_setting('telegram_bot_plugin_settings_general', 'telegram_bot_token');
-        register_setting('telegram_bot_plugin_settings_general', 'telegram_chat_id');
+        register_setting(
+            'telegram_bot_plugin_settings_general', // Ідентифікатор групи налаштувань
+            'telegram_chat_id' // Ідентифікатор поля
+        );
     }
     add_action('admin_init', 'telegram_bot_plugin_init_settings_general');
     
@@ -146,7 +151,7 @@
     function telegram_bot_plugin_init_settings_field() {
         add_settings_section(
             'telegram_bot_plugin_field_section',
-            'Select in which form which fields will be sent to telegram:',
+            'Select which forms and fields will be sent to telegram:',
             'my_plugin_field_settings_callback',
             'telegram_bot_plugin_settings_field'
         );  
@@ -161,64 +166,63 @@
 
 
     // Сторінка налаштувань 'Telegram Bot'
-    function telegram_bot_settings_page() {
+    function telegram_bot_settings_general_page() {
         ?>
         <div class="wrap">
-            <h1>Telegram Bot Settings</h1>
-            <h2 class="nav-tab-wrapper">
-                <a href="#general-settings" class="nav-tab nav-tab-active">Bot Settings</a>
-                <a href="#field-settings" class="nav-tab">Setting Forms and Fields</a>
-            </h2>
-    
-            <!-- Вміст 1 табу - General Settings -->
-            <div id="general-settings" class="tab-content">
-                <form method="post" action="options.php">
-                    <?php
-                    settings_fields('telegram_bot_plugin_settings_general');
-                    do_settings_sections('telegram_bot_plugin_settings_general');
-                    ?>
-                    <?php submit_button(); ?>
-                </form>
-            </div>
-    
-            <!-- Вміст 2 табу - Field Settings -->
-            <div id="field-settings" class="tab-content" style="display:none;">
-                <form method="post" action="options.php">
-                    <?php
-                    settings_fields('telegram_bot_plugin_settings_field');
-                    do_settings_sections('telegram_bot_plugin_settings_field');
-                    ?>
-                    <?php submit_button(); ?>
-                </form>
-            </div>
+            <h1 style="margin-bottom:40px;">Telegram Bot Settings</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('telegram_bot_plugin_settings_general');
+                do_settings_sections('telegram_bot_plugin_settings_general');
+                submit_button();
+                ?>
+            </form>
         </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function(){
-                const tabs = document.querySelectorAll('.nav-tab-wrapper a');
-                const tabContents = document.querySelectorAll('.tab-content');
-
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', function(e){
-                        e.preventDefault();
-
-                        // Видаляємо активний клас з усіх вкладок
-                        tabs.forEach(tab => tab.classList.remove('nav-tab-active'));
-
-                        // Приховуємо вміст всіх табів
-                        tabContents.forEach(content => content.style.display = 'none');
-
-                        // Показуємо вміст табу, який вибрав користувач
-                        const targetTab = tab.getAttribute('href');
-                        document.querySelector(targetTab).style.display = 'block';
-
-                        // Додаємо активний клас до обраної вкладки
-                        tab.classList.add('nav-tab-active');
-                    });
-                });
-            });
-        </script>
         <?php
     }
 
+
+    // Сторінка налаштувань 'Setting Forms and Fields'
+    function telegram_bot_field_settings_page() {
+        ?>
+        <div class="wrap">
+            <h1 style="margin-bottom:40px;">Setting Forms and Fields</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('telegram_bot_plugin_settings_field');
+                do_settings_sections('telegram_bot_plugin_settings_field');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+    }
+
+// ...
+?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        const tabs = document.querySelectorAll('.nav-tab-wrapper a');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e){
+                e.preventDefault();
+
+                // Видаляємо активний клас з усіх вкладок
+                tabs.forEach(tab => tab.classList.remove('nav-tab-active'));
+
+                // Додаємо активний клас до обраної вкладки
+                tab.classList.add('nav-tab-active');
+                
+                // Отримуємо ідентифікатор сторінки
+                const pageId = tab.getAttribute('href').substring(1);
+                
+                // Перенаправляємо на відповідну сторінку
+                window.location.href = `admin.php?page=${pageId}`;
+            });
+        });
+    });
+</script>
+<?php
 ?>
