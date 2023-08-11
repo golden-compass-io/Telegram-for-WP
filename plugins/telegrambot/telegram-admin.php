@@ -1,4 +1,5 @@
 <?php
+
     // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
@@ -63,79 +64,94 @@
         echo '<input type="text" name="telegram_chat_id" value="' . esc_attr($value) . '" />';
     }
 
-
-
-
     // -----------------Для полей ----------
 
+    
+
     function my_plugin_field_settings_callback() {
+
         $theme_folder = get_template_directory();
         $selected_fields = get_option('my_plugin_settings_forms', array());
-    
         $php_files = scandir($theme_folder);
-    
+
         foreach ($php_files as $php_file) {
             $file_path = $theme_folder . '/' . $php_file;
-    
+        
             if (pathinfo($php_file, PATHINFO_EXTENSION) === 'php') {
                 $form_html = file_get_contents($file_path);
-    
+        
                 $dom = new DOMDocument();
                 @$dom->loadHTML($form_html);
-    
+        
                 $xpath = new DOMXPath($dom);
                 $forms = $xpath->query("//form[contains(@class, 'checkout')]");
-    
+        
                 foreach ($forms as $form) {
                     $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
+                    
                     if ($title->length > 0) {
                         $form_name = $title->item(0)->textContent;
                     }
-    
-                    $is_form_checked = in_array($form_name, $selected_fields) ? 'checked' : 'checked'; // Додано 'checked' як стан за замовчуванням
+        
+                    $is_form_checked = in_array($form_name, $selected_fields) ? 'checked' : '';
+                    $is_form_checked_attribute = $is_form_checked === 'checked' ? 'checked' : '';
+
                     ?>
-                    <input style="margin-bottom: 5px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($form_name); ?>" <?php echo $is_form_checked; ?> />
-                    <label style="font-size: 15px; margin-bottom: 10px; display: inline-block;" ><strong><?php echo 'Form: ' . esc_html($form_name); ?></strong></label><br>
-                    <?php
-    
-                    $inputs = $xpath->query(".//input[@name]", $form);
-                    foreach ($inputs as $input) {
-                        $input_name = $input->getAttribute('name');
-                        $is_input_checked = in_array($input_name, $selected_fields) ? 'checked' : '';
-                        ?>
-                        <input style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                    <div class="mainWrapper">
+                        <input class="parentCheckbox" style="margin-bottom: 5px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($form_name); ?>" <?php echo $is_form_checked; ?> />
+                        <label style="font-size: 15px; margin-bottom: 10px; display: inline-block;"><strong><?php echo 'Form: ' . esc_html($form_name); ?></strong></label><br>
                         <?php
-                    }
-    
-                    $textareas = $xpath->query(".//textarea[@name]", $form);
-                    foreach ($textareas as $textarea) {
-                        $textarea_name = $textarea->getAttribute('name');
-                        $is_textarea_checked = in_array($textarea_name, $selected_fields) ? 'checked' : '';
-                        ?>
-                        <input style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
-                        <?php
-                    }
+        
+                        $inputs = $xpath->query(".//input[@name]", $form);
+                        foreach ($inputs as $input) {
+                            $input_name = $input->getAttribute('name');
+                            $is_input_checked = in_array($input_name, $selected_fields) ? 'checked' : '';
+                            if($is_form_checked == ''){
+                                ?>
+                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                                <?php
+                            }else{
+                                ?>
+                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                                <?php
+                            }
+                            
+                        }
+                        $textareas = $xpath->query(".//textarea[@name]", $form);
+                        foreach ($textareas as $textarea) {
+                            $textarea_name = $textarea->getAttribute('name');
+                            $is_textarea_checked = in_array($textarea_name, $selected_fields) ? 'checked' : '';
+                            if($is_form_checked == ''){
+                                ?>
+                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
+                                <?php
+                            }else{
+                                ?>
+                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_forms[]" value="<?php echo esc_attr($textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
+                                <?php
+                            }
+                        }
                     ?>
+                    </div>
                     <br><br>
                     <?php
                 }
-              
-                
             }
         }
     }
-    
+
 
 
     // // Добавляем настройки поля в раздел Field Settings
     function telegram_bot_plugin_init_settings_field() {
         add_settings_section(
             'telegram_bot_plugin_field_section',
-            'Choose which fields to send to Telegram Bot:',
+            'Select in which form which fields will be sent to telegram:',
             'my_plugin_field_settings_callback',
             'telegram_bot_plugin_settings_field'
         );  
           
+        register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_fields');
         register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_forms');
     }
     add_action('admin_init', 'telegram_bot_plugin_init_settings_field');
@@ -151,7 +167,7 @@
             <h1>Telegram Bot Settings</h1>
             <h2 class="nav-tab-wrapper">
                 <a href="#general-settings" class="nav-tab nav-tab-active">Bot Settings</a>
-                <a href="#field-settings" class="nav-tab">Setting Fields</a>
+                <a href="#field-settings" class="nav-tab">Setting Forms and Fields</a>
             </h2>
     
             <!-- Вміст 1 табу - General Settings -->

@@ -1,6 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.checkout');
+    const forms = document.querySelectorAll('.checkout'),
+        modal = document.querySelector('.modal');
 
+    function closeModal(){
+        modal.classList.add('hide');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    
     forms.forEach(item => {
         postData(item);
     })
@@ -18,6 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.forEach(function(value, key){
                 object[key] = value;
             });
+
+
             fetch('/plugins/telegrambot/telegrambot.php', {
                 method: 'POST',
                 headers: {
@@ -25,10 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({...object, ...formName})
     
-            }).then()
-            .catch()
+            }).then(data => {
+                console.log(data);
+            })
+            .catch(data => {
+                console.log(data);
+            })
             .finally(() => {
                 form.reset();
+                closeModal();
             });
             
             
