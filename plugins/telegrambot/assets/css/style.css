@@ -8,3 +8,6 @@ ol{
 b{
     color:#1976D2;
 }
+#adminmenu .wp-menu-image img {
+    padding: 4px 0 !important;
+}

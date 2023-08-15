@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.checkout'),
+    const forms = document.querySelectorAll('form'),
         modal = document.querySelector('.modal');
 
     function closeModal(){
@@ -8,126 +8,71 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     }
     
-    forms.forEach(item => {
-        postData(item);
+    forms.forEach((form, index) => {
+        postData(form, index);
     })
     
-    function postData(form){
-        form.addEventListener('submit', (e) => {
+    function postData(form, index){
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const name = form.querySelector('.form__title').textContent;
             const price = form.querySelector('.order-total').textContent;
-            const productName = form.querySelectorAll('.product-name');
+            const product_name = form.querySelectorAll('.product-name');
 
-              
-            const formName = {'formname' : name};
             const formData = new FormData(form);
-    
+
+         
+
             const object = {};
             formData.forEach(function(value, key){
                 object[key] = value;
             });
 
+            const data = {};
+            for (const key in object) {
+                data[`${key}_${index}`] = object[key];
+            }
 
-            // price && productName
-            if(price && productName){
-                const totalprice = {'totalprice' : price};
+            if (name) {
+                data[`formname`] = name;
+            }
 
-                const productList = {
-                    "productName": []
-                };
-                productName.forEach((product, i) => {
-                    productList["productName"] += `${product.textContent}, `;
-                });
-                
-                
-                fetch('/plugins/telegrambot/telegrambot.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({...object, ...formName, ...productList, ...totalprice})
-        
-                }).then(data => {
-                    console.log(data);
-                })
-                .catch(data => {
-                    console.log(data);
-                })
-                .finally(() => {
-                    form.reset();
-                    closeModal();
-                });
-            // productName
-            }else if(productName){
-               const productList = {
-                    "productName": []
-                };
-                productName.forEach((product, i) => {
-                    productList["productname"] =+ product.textContent;
-                });
+            if (price) {
+                data[`total_price_${index}`] = price;
+            }
 
-                fetch('/plugins/telegrambot/telegrambot.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({...object, ...formName, ...productList,})
-        
-                }).then(data => {
-                    console.log(data);
-                })
-                .catch(data => {
-                    console.log(data);
-                })
-                .finally(() => {
-                    form.reset();
-                    closeModal();
-                });
-            }else if(price){
-                const totalprice = {'totalprice' : price};
-                fetch('/plugins/telegrambot/telegrambot.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({...object, ...formName, ...totalprice,})
-        
-                }).then(data => {
-                    console.log(data);
-                })
-                .catch(data => {
-                    console.log(data);
-                })
-                .finally(() => {
-                    form.reset();
-                    closeModal();
-                });
-            }else{
-                fetch('/plugins/telegrambot/telegrambot.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({...object, ...formName, ...productList, ...totalprice})
-        
-                }).then(data => {
-                    console.log(data);
-                })
-                .catch(data => {
-                    console.log(data);
-                })
-                .finally(() => {
-                    form.reset();
-                    closeModal();
+            if (product_name) {
+                product_name.forEach((product, i) => {
+                    if (!data[`product_name_${index}`]) {
+                        data[`product_name_${index}`] = '';
+                    }
+                    data[`product_name_${index}`] += `${product.textContent}, `;
+                    
                 });
             }
-          
 
+            await sendData(data);
 
-            
-            
+            form.reset();
+            closeModal();
         });
+        
+    }
+
+    async function sendData(data) {
+        try {
+            const response = await fetch('/plugins/telegrambot/telegrambot.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });

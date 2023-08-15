@@ -39,11 +39,11 @@ require_once( plugin_dir_path( __FILE__ ) . 'functions.php' );
 //                 $message .= "*$name*: $value\n";
 //             }
 //         }
-//          // Додайте перевірку для "totalprice"
-//         $totalprice_checked = in_array('totalprice', get_option('my_plugin_settings_forms', array()));
-//         if ($totalprice_checked) {
-//              $totalprice_value = $data['totalprice'];
-//              $message .= "*Total price*: $totalprice_value\n";
+//          // Додайте перевірку для "totalprise"
+//         $totalprise_checked = in_array('totalprise', get_option('my_plugin_settings_forms', array()));
+//         if ($totalprise_checked) {
+//              $totalprise_value = $data['totalprise'];
+//              $message .= "*Total Prise*: $totalprise_value\n";
 //              $atLeastOneChecked = true;
 //         }
  
@@ -93,23 +93,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (!empty($data)) {
-        $message = "*Form:* " . $data['formname'] . "\n\n";
+
+        $message = "\n\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
+        
         $atLeastOneChecked = false;
 
         foreach ($data as $name => $value) {
-            $checked = in_array($name, get_option('my_plugin_settings_forms', array()));
+            $checked = in_array($name, get_option('my_plugin_settings_field', array()));
 
             if ($checked) {
                 $atLeastOneChecked = true;
                 $name = sanitize_text_field($name);
                 $value = sanitize_text_field($value);
+                $name_without_numbers = preg_replace('/[\d_]+/', ' ', $name);
+
+                $message .= "<b>$name_without_numbers</b>: $value\n";
                 
-                
-                if($name === 'productName'){
-                    $value = $data['productName'];
-                }
-                
-                $message .= "*$name*: $value\n";
+               
             }
         }
 
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chat_id = get_option('telegram_chat_id');
 
             $text = $message;
-            $parse_mode = 'Markdown';
+            $parse_mode = 'HTML';
 
             $api_url = "https://api.telegram.org/bot$bot_token/sendMessage";
             $data = [
@@ -137,6 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $context = stream_context_create($options);
             $result = file_get_contents($api_url, false, $context);
+            
+            
         }
     }
 }

@@ -8,10 +8,8 @@
     7. Copy your Chat ID, go to wp-admin in the plugin, and paste in the Telegram Chat ID field
     8. Click the save changes button
 # 2) To go to the next point you need to do some actions:
-        1. Add class checkout to all your forms in which you want to take data !!! You need to add the class exactly to the form tag: <form class="checkout"></form>
-        2. Add class form__title to the tag from which the name of your form will be taken
-        3. Name attributes of input must be unique
-        4. Paste this code in themes -> your theme folder -> functions.php
+        1. Add class form__title to the tag from which the name of your form will be taken
+        2. Paste this code in themes -> your theme folder -> functions.php
 ```    
     <?php
         function enqueue_telegrambot_script() {
