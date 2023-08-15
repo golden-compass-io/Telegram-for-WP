@@ -15,7 +15,7 @@
 ```    
     <?php
         function enqueue_telegrambot_script() {
-            $plugin_script_url = plugins_url( 'telegrambot/js/script.js' );
+            $plugin_script_url = plugins_url( 'telegrambot/assets/js/script.js' );
      
              wp_register_script( 'telegrambot-script', $plugin_script_url, array(), '1.0', true );
             wp_enqueue_script( 'telegrambot-script' );
