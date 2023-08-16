@@ -3,7 +3,7 @@
     // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
-        add_menu_page('Telegram Bot', 'Telegram Bot', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
+        add_menu_page('Telegram Notifier ', 'Telegram Notifier', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
         add_submenu_page('telegram_bot_settings', 'Telegram Bot Settings', 'Telegram Bot Settings', 'manage_options', 'telegram_bot_general_settings', 'telegram_bot_settings_general_page');
         add_submenu_page('telegram_bot_settings', 'Setting Forms and Fields', 'Setting Forms and Fields', 'manage_options', 'telegram_bot_field_settings', 'telegram_bot_field_settings_page');
     }
@@ -30,13 +30,13 @@
             <ol>
                 <li>Add class <b>form__title</b> to the tag from which the name of your form will be taken</li>
                 <li>Paste this code in themes -> your theme folder -> functions.php
-                <pre><code>function enqueue_telegrambot_script() {
-    $plugin_script_url = plugins_url( 'telegrambot/assets/js/script.js' );
-
-    wp_register_script( 'telegrambot-script', $plugin_script_url, array(), '1.0', true );
-    wp_enqueue_script( 'telegrambot-script' );
+                <pre><code>function enqueue_telegramnotifier_script() {
+    $plugin_script_url = plugins_url( 'telegramnotifier/assets/js/script.js' );
+    
+    wp_register_script( 'telegramnotifier-script', $plugin_script_url, array(), '1.0', true );
+    wp_enqueue_script( 'telegramnotifier-script' );
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
+add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></pre>
                 </li>
             </ol>
 
@@ -53,39 +53,37 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
 
 
     // -----------------Для токена та ID ----------
-    // Додайте поля для введення токена та ID чату на сторінці налаштувань:
     function telegram_bot_plugin_init_settings_general() {
         add_settings_section(
-            'telegram_bot_settings_general_section', // Ідентифікатор секції
+            'telegram_bot_settings_general_section',
             'Еnter the data',
-            '', // Функція зворотного виклику для виводу опису секції (можна залишити порожньою)
-            'telegram_bot_plugin_settings_general' // Ідентифікатор сторінки
-        );
-    
-        // Додавання полів
-        add_settings_field(
-            'telegram_bot_token', // Ідентифікатор поля
-            'Telegram Bot Token', // Назва поля
-            'telegram_bot_token_callback', // Функція зворотного виклику для виводу поля
-            'telegram_bot_plugin_settings_general', // Ідентифікатор сторінки
-            'telegram_bot_settings_general_section' // Ідентифікатор секції
+            '',
+            'telegram_bot_plugin_settings_general'
         );
     
         add_settings_field(
-            'telegram_chat_id', // Ідентифікатор поля
-            'Telegram Chat ID', // Назва поля
-            'telegram_chat_id_callback', // Функція зворотного виклику для виводу поля
-            'telegram_bot_plugin_settings_general', // Ідентифікатор сторінки
-            'telegram_bot_settings_general_section' // Ідентифікатор секції
+            'telegram_bot_token',
+            'Telegram Bot Token',
+            'telegram_bot_token_callback',
+            'telegram_bot_plugin_settings_general',
+            'telegram_bot_settings_general_section'
+        );
+    
+        add_settings_field(
+            'telegram_chat_id', 
+            'Telegram Chat ID', 
+            'telegram_chat_id_callback', 
+            'telegram_bot_plugin_settings_general', 
+            'telegram_bot_settings_general_section'
         );
     
         register_setting(
-            'telegram_bot_plugin_settings_general', // Ідентифікатор групи налаштувань
-            'telegram_bot_token' // Ідентифікатор поля
+            'telegram_bot_plugin_settings_general',
+            'telegram_bot_token'
         );
         register_setting(
-            'telegram_bot_plugin_settings_general', // Ідентифікатор групи налаштувань
-            'telegram_chat_id' // Ідентифікатор поля
+            'telegram_bot_plugin_settings_general', 
+            'telegram_chat_id' 
         );
     }
     add_action('admin_init', 'telegram_bot_plugin_init_settings_general');
@@ -120,13 +118,12 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
         
                 $xpath = new DOMXPath($dom);
                 $forms = $xpath->query("//form");
-                $formsLength = $forms->length;
 
                 $i = 0;
                 foreach ($forms as $form) {
                     $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
                     $price = $xpath->query(".//*[contains(@class, 'order-total')]", $form);
-                    $product_name = $xpath->query(".//*[contains(@class, 'product-name')]", $form);
+                    $products = $xpath->query(".//*[contains(@class, 'product-name')]", $form);
 
                     if ($title->length > 0) {
                         $form_name = $title->item(0)->textContent;
@@ -157,18 +154,18 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
                             } 
                         }
 
-                        if ($product_name->length > 0) {
-                            $product= 'product_name';
-                            $dynamic_product_name = $product . "_$i"; // Додайте динамічний індекс
-                            $is_field_checked = in_array($dynamic_product_name, $selected_fields) ? 'checked' : '';
+                        if ($products->length > 0) {
+                            $products= 'products';
+                            $dynamic_products = $products. "_$i"; // Додайте динамічний індекс
+                            $is_field_checked = in_array($dynamic_products, $selected_fields) ? 'checked' : '';
                             if($is_form_checked == ''){
 
                                 ?>
-                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_product_name); ?>" <?php echo $is_field_checked; ?>/> product name<br>
+                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_products); ?>" <?php echo $is_field_checked; ?>/> products<br>
                                 <?php
                             }else{
                                 ?>
-                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_product_name); ?>" <?php echo $is_field_checked; ?>/> product name<br>
+                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_products); ?>" <?php echo $is_field_checked; ?>/> products<br>
                                 <?php
                             } 
                         }
@@ -176,7 +173,7 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
                         $inputs = $xpath->query(".//input[@name]", $form);
                         foreach ($inputs as $input) {
                             $input_name = $input->getAttribute('name');
-                            $dynamic_input_name = $input_name . "_$i"; // Додайте динамічний індекс
+                            $dynamic_input_name = $input_name . "_$i"; 
                             $is_input_checked = in_array($dynamic_input_name, $selected_fields) ? 'checked' : '';
 
                             if ($is_form_checked == '') {
@@ -205,11 +202,6 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
                                 <?php
                             }
                         }
-                        $checkbox = get_option('my_plugin_settings_form', array());
-                        $name_without_number = preg_replace('/_\d+$/', '', $checkbox);
-                    
-                        print_r($checked);
-                        
                     ?>
                     </div>
                     <br><br>
@@ -234,7 +226,6 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
           
 
         register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_field');
-        // register_setting('telegram_bot_plugin_settings_field', 'my_plugin_settings_field');
     }
     add_action('admin_init', 'telegram_bot_plugin_init_settings_field');
     
@@ -286,16 +277,12 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); </code></pre>
             tab.addEventListener('click', function(e){
                 e.preventDefault();
 
-                // Видаляємо активний клас з усіх вкладок
                 tabs.forEach(tab => tab.classList.remove('nav-tab-active'));
 
-                // Додаємо активний клас до обраної вкладки
                 tab.classList.add('nav-tab-active');
                 
-                // Отримуємо ідентифікатор сторінки
                 const pageId = tab.getAttribute('href').substring(1);
                 
-                // Перенаправляємо на відповідну сторінку
                 window.location.href = `admin.php?page=${pageId}`;
             });
         });

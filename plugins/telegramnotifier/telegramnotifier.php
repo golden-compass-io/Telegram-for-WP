@@ -1,9 +1,9 @@
 <?php
-/* Plugin name: telegram-bot 
-* Description: Підключення телеграм-бота на сайт для отримання замовлень.
+/* Plugin name: telegram notifier 
+* Description: The "telegram notifier" plugin is a powerful tool that helps you quickly process requests and respond to orders. In this way, you ensure a high level of service and convenience for your audience.
 * Version: 1.0
 * Author: Golden Compass
-* Author URI: https://example.com
+* Author URI: https://goldencompass.io/
 */
 require_once( plugin_dir_path( __FILE__ ) . 'telegram-admin.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'functions.php' );
@@ -13,9 +13,9 @@ require_once( plugin_dir_path( __FILE__ ) . 'functions.php' );
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!empty($data)) {
+    if (!empty($data)){
 
-        $message = "-----------------------\n<b>Application number: </b>" . $data['counter'] . "\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
+        $message = "-----------------------\n<b>Request number: </b>" . $data['counter'] . "\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
         
         $atLeastOneChecked = false;
 
