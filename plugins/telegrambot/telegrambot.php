@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($data)) {
 
-        $message = "\n\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
+        $message = "-----------------------\n<b>Application number: </b>" . $data['counter'] . "\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
         
         $atLeastOneChecked = false;
 
@@ -26,10 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $atLeastOneChecked = true;
                 $name = sanitize_text_field($name);
                 $value = sanitize_text_field($value);
-                $name_without_numbers = preg_replace('/[\d_]+/', ' ', $name);
 
-                $message .= "<b>$name_without_numbers</b>: $value\n";
-                
+                $name_without_numbers = preg_replace('/[\d_]+/', ' ', $name);
+                $value_with_b = preg_replace('/,\s*/', "\n   -", $value);
+
+                $message .= "<b>$name_without_numbers</b>: $value_with_b\n";
                
             }
         }
