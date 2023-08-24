@@ -1,17 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('form'),
-        modal = document.querySelector('.modal');
-
-    function closeModal(){
-        modal.classList.add('hide');
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
+    const forms = document.querySelectorAll('form');
     
     forms.forEach((form, index) => {
         postData(form, index);
     })
-
 
     let counter = parseInt(localStorage.getItem('counter'), 10) || 1; // За замовчуванням 1, якщо в локальному сховищі немає збереженого значення
     
@@ -19,8 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = form.querySelector('.form__title').textContent;
-            const price = form.querySelector('.order-total').textContent;
+            let name = '';
+            let price = '';
+            try{name =  form.querySelector('.form__title').textContent;}catch(e){}
+            try{price = form.querySelector('.order-total').textContent;}catch(e){}
             const products = form.querySelectorAll('.product-name');
 
             const formData = new FormData(form);
@@ -57,8 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
             await sendData(data);
 
             form.reset();
-            closeModal();
-            console.log(data);
 
             counter ++;
             localStorage.setItem('counter', counter); // Збереження counter у локальному сховищі
@@ -77,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(data)
             });
 
-            console.log(response);
         } catch (error) {
             console.error(error);
         }
