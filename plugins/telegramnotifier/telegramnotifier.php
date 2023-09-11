@@ -13,9 +13,28 @@ require_once( plugin_dir_path( __FILE__ ) . 'functions.php' );
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!empty($data)){
+    $servername = get_option('server_name'); // Имя сервера базы данных (обычно "localhost")
+    $username = get_option('user_name'); // Ваше имя пользователя MySQL
+    $password = get_option('password'); // Ваш пароль MySQL
+    $databaseName = get_option('database_name');
 
-        $message = "-----------------------\n<b>Request number: </b>" . $data['counter'] . "\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
+    $db = mysqli_connect($servername, $username, $password, $databaseName) or die('Помилка');  
+
+    // SQL-запрос для проверки существования таблицы
+    // $table_name = `request_counter`;
+    $check_table_sql = "SHOW TABLES LIKE '$table_name'";
+    $table_exists = $conn->query($check_table_sql);
+
+    if (!empty($data)){
+        $query = mysqli_query($db, "INSERT INTO `request_counter` (`id`) VALUES (NULL);");
+
+        if ($query) {
+            $count_id = mysqli_insert_id($db);
+        } else {
+            echo "";
+        }
+
+        $message = "-----------------------\n<b>Request number: </b>" . $count_id . "\n<i><b>Form:</b> " . $data['formname'] . "</i>\n\n";
         
         $atLeastOneChecked = false;
 
@@ -31,10 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $value_with_b = preg_replace('/,\s*/', "\n   -", $value);
 
                 $message .= "<b>$name_without_numbers</b>: $value_with_b\n";
-               
             }
         }
-
         if ($atLeastOneChecked) {
             $bot_token = get_option('telegram_bot_token');
             $chat_id = get_option('telegram_chat_id');

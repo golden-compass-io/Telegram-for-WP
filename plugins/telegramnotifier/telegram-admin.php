@@ -1,10 +1,10 @@
 <?php
-
     // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
         add_menu_page('Telegram Notifier ', 'Telegram Notifier', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
         add_submenu_page('telegram_bot_settings', 'Telegram Bot Settings', 'Telegram Bot Settings', 'manage_options', 'telegram_bot_general_settings', 'telegram_bot_settings_general_page');
+        add_submenu_page('telegram_bot_settings', 'Database Settings', 'Database Settings', 'manage_options', 'telegram_bot_database_settings', 'telegram_bot_settings_database_page');
         add_submenu_page('telegram_bot_settings', 'Setting Forms and Fields', 'Setting Forms and Fields', 'manage_options', 'telegram_bot_field_settings', 'telegram_bot_field_settings_page');
     }
     
@@ -98,6 +98,91 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
         $value = get_option('telegram_chat_id', '');
         echo '<input type="text" name="telegram_chat_id" value="' . esc_attr($value) . '" />';
     }
+
+
+
+
+    // -----------------Для данних MySql ----------
+    function telegram_bot_plugin_init_settings_database() {
+        add_settings_section(
+            'telegram_bot_settings_database_section',
+            'Еnter the data',
+            '',
+            'telegram_bot_plugin_settings_database'
+        );
+    
+        add_settings_field(
+            'server_name',
+            'Server Name',
+            'server_name_callback',
+            'telegram_bot_plugin_settings_database',
+            'telegram_bot_settings_database_section'
+        );
+    
+        add_settings_field(
+            'user_name', 
+            'User name', 
+            'user_name_callback', 
+            'telegram_bot_plugin_settings_database',
+            'telegram_bot_settings_database_section'
+        );
+
+        add_settings_field(
+            'password',
+            'Password',
+            'password_callback',
+            'telegram_bot_plugin_settings_database',
+            'telegram_bot_settings_database_section'
+        );
+    
+        add_settings_field(
+            'database_name', 
+            'Database name', 
+            'database_name_callback', 
+            'telegram_bot_plugin_settings_database',
+            'telegram_bot_settings_database_section'
+        );
+    
+        register_setting(
+            'telegram_bot_plugin_settings_database',
+            'server_name'
+        );
+        register_setting(
+            'telegram_bot_plugin_settings_database', 
+            'user_name' 
+        );
+        register_setting(
+            'telegram_bot_plugin_settings_database',
+            'password'
+        );
+        register_setting(
+            'telegram_bot_plugin_settings_database', 
+            'database_name' 
+        );
+    }
+    add_action('admin_init', 'telegram_bot_plugin_init_settings_database');
+    
+
+    function server_name_callback() {
+        $value = get_option('server_name', '');
+        echo '<input type="text" name="server_name" value="' . esc_attr($value) . '" />';
+    }
+
+    function user_name_callback() {
+        $value = get_option('user_name', '');
+        echo '<input type="text" name="user_name" value="' . esc_attr($value) . '" />';
+    }
+
+    function password_callback() {
+        $value = get_option('password', '');
+        echo '<input type="text" name="password" value="' . esc_attr($value) . '" />';
+    }
+
+    function database_name_callback() {
+        $value = get_option('database_name', '');
+        echo '<input type="text" name="database_name" value="' . esc_attr($value) . '" />';
+    }
+
 
     // -----------------Для полей ----------
 
@@ -231,8 +316,6 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
     
 
 
-
-
     // Сторінка налаштувань 'Telegram Bot'
     function telegram_bot_settings_general_page() {
         ?>
@@ -242,6 +325,22 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
                 <?php
                 settings_fields('telegram_bot_plugin_settings_general');
                 do_settings_sections('telegram_bot_plugin_settings_general');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    // Сторінка налаштувань 'Database Settings'
+    function telegram_bot_settings_database_page() {
+        ?>
+        <div class="wrap">
+            <h1 style="margin-bottom:40px;">Database Settings</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('telegram_bot_plugin_settings_database');
+                do_settings_sections('telegram_bot_plugin_settings_database');
                 submit_button();
                 ?>
             </form>

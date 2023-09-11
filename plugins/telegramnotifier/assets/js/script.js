@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     forms.forEach((form, index) => {
         postData(form, index);
     })
-
-    let counter = parseInt(localStorage.getItem('counter'), 10) || 1; // За замовчуванням 1, якщо в локальному сховищі немає збереженого значення
     
     function postData(form, index){
         form.addEventListener('submit', async (e) => {
@@ -46,14 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                 });
             }
-            data['counter'] = counter;
 
             await sendData(data);
 
             form.reset();
-
-            counter ++;
-            localStorage.setItem('counter', counter); // Збереження counter у локальному сховищі
             
         });
         
