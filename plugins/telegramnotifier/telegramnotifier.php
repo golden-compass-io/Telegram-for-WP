@@ -13,17 +13,23 @@ require_once( plugin_dir_path( __FILE__ ) . 'functions.php' );
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $servername = get_option('server_name'); // Имя сервера базы данных (обычно "localhost")
-    $username = get_option('user_name'); // Ваше имя пользователя MySQL
-    $password = get_option('password'); // Ваш пароль MySQL
+    $servername = get_option('server_name');
+    $username = get_option('user_name'); 
+    $password = get_option('password'); 
     $databaseName = get_option('database_name');
 
     $db = mysqli_connect($servername, $username, $password, $databaseName) or die('Помилка');  
 
-    // SQL-запрос для проверки существования таблицы
-    // $table_name = `request_counter`;
-    $check_table_sql = "SHOW TABLES LIKE '$table_name'";
-    $table_exists = $conn->query($check_table_sql);
+    $sql = "CREATE TABLE IF NOT EXISTS `request_counter` (
+        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )";
+
+    if ($db->query($sql) === TRUE) {
+        echo "Таблица успешно создана";
+    } else {
+        echo "Ошибка при создании таблицы: ";
+    }
 
     if (!empty($data)){
         $query = mysqli_query($db, "INSERT INTO `request_counter` (`id`) VALUES (NULL);");
@@ -81,8 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-
 
 ?>
 
