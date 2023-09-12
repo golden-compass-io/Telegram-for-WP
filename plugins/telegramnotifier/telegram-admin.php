@@ -2,7 +2,7 @@
     // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
-        add_menu_page('Telegram Notifier ', 'Telegram Notifier', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
+        add_menu_page('Telegram Notifier', 'Telegram Notifier', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
         add_submenu_page('telegram_bot_settings', 'Telegram Bot Settings', 'Telegram Bot Settings', 'manage_options', 'telegram_bot_general_settings', 'telegram_bot_settings_general_page');
         add_submenu_page('telegram_bot_settings', 'Database Settings', 'Database Settings', 'manage_options', 'telegram_bot_database_settings', 'telegram_bot_settings_database_page');
         add_submenu_page('telegram_bot_settings', 'Setting Forms and Fields', 'Setting Forms and Fields', 'manage_options', 'telegram_bot_field_settings', 'telegram_bot_field_settings_page');
@@ -40,12 +40,22 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
                 </li>
             </ol>
 
+            <h2 class="readmy__title">Database Settings tab</h2>
+                <ol>
+                    <li>Go to Telegram Notifier -> the Database Settings tab</li>
+                    <li>In the field Server Name, The default is <code>localhost</code>. If it doesn’t fit, go to phpMyAdmin, click on the house icon, and in the right corner there will be a block with the name "database server", in it, there is an item with the name "server", take the value from there</li>
+                    <li>In the field User name, enter the database user name.</li>
+                    <li>In the field Password, enter password, which you set for this user.</li>
+                    <li>In the field Database name, enter: database name</li>
+                </ol> 
+
             <h2 class="readmy__title">Setting Forms and Fields tab</h2>
                 <ol>
-                    <li>Go to wp-admin -> plugin -> the Setting Forms and Fields tab</li>
+                    <li>Go to Telegram Notifier -> the Setting Forms and Fields tab</li>
                     <li>Select in which forms which fields you want to receive in Telegram</li>
                     <div><span style="color: #D50000; margin-left:-16px">!!!</span> The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything <span  style="color: #D50000;">!!!</span></div>
                 </ol> 
+
             
         </div>
         <?php
@@ -101,13 +111,12 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
 
 
 
-
     // -----------------Для данних MySql ----------
     function telegram_bot_plugin_init_settings_database() {
         add_settings_section(
             'telegram_bot_settings_database_section',
             'Еnter the data',
-            '',
+            '', // Изменили эту строку
             'telegram_bot_plugin_settings_database'
         );
     
@@ -145,7 +154,10 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
     
         register_setting(
             'telegram_bot_plugin_settings_database',
-            'server_name'
+            'server_name',
+            array(
+                'default' => 'localhost' // Задаем значение по умолчанию
+            )
         );
         register_setting(
             'telegram_bot_plugin_settings_database', 
@@ -161,12 +173,13 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
         );
     }
     add_action('admin_init', 'telegram_bot_plugin_init_settings_database');
-    
 
+    
     function server_name_callback() {
-        $value = get_option('server_name', '');
-        echo '<input type="text" name="server_name" value="' . esc_attr($value) . '" />';
+        $value = get_option('server_name', ''); 
+        echo '<input type="text" name="server_name" value="' . esc_attr($value) . '" placeholder="localhost" />';    
     }
+
 
     function user_name_callback() {
         $value = get_option('user_name', '');
@@ -182,7 +195,6 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
         $value = get_option('database_name', '');
         echo '<input type="text" name="database_name" value="' . esc_attr($value) . '" />';
     }
-
 
     // -----------------Для полей ----------
 
@@ -332,22 +344,42 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
         <?php
     }
 
+
+
     // Сторінка налаштувань 'Database Settings'
     function telegram_bot_settings_database_page() {
+       
+        $error_message = '';
+    
+        $servername = get_option('server_name');
+        $username = get_option('user_name'); 
+        $password = get_option('password'); 
+        $databaseName = get_option('database_name');
+    
+        $db = mysqli_connect($servername, $username, $password, $databaseName); 
+
+        if(!$db) {
+            $error_message = '<h2 style="color:red; margin-left: 50px">Invalid database connection credentials</h2>';
+
+        }else {
+            $error_message = '';
+        }
         ?>
         <div class="wrap">
-            <h1 style="margin-bottom:40px;">Database Settings</h1>
+            <h1 style="margin-bottom:40px;">Database Settings</h1>  
             <form method="post" action="options.php">
+            <?php wp_nonce_field('my_nonce_action', 'my_nonce_field'); ?>
                 <?php
                 settings_fields('telegram_bot_plugin_settings_database');
                 do_settings_sections('telegram_bot_plugin_settings_database');
                 submit_button();
                 ?>
             </form>
+            <?php echo $error_message; ?>    
         </div>
         <?php
     }
-
+    
 
     // Сторінка налаштувань 'Setting Forms and Fields'
     function telegram_bot_field_settings_page() {

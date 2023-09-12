@@ -12,13 +12,15 @@
         2. Paste this code in themes -> your theme folder -> functions.php
 ```    
     <?php
-        function enqueue_telegrambot_script() {
-            $plugin_script_url = plugins_url( 'telegrambot/assets/js/script.js' );
-     
-             wp_register_script( 'telegrambot-script', $plugin_script_url, array(), '1.0', true );
-            wp_enqueue_script( 'telegrambot-script' );
+        function enqueue_telegramnotifier_script() {
+            $plugin_script_url = plugins_url( 'telegramnotifier/assets/js/script.js' );
+            
+            wp_register_script( 'telegramnotifier-script', $plugin_script_url, array(), '1.0', true );
+            wp_enqueue_script( 'telegramnotifier-script' );
         }
-        add_action( 'wp_enqueue_scripts', 'enqueue_telegrambot_script' ); 
+        add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' );
     ?>
 ```      
-# 3) Go to wp-admin -> plugin -> the Setting Forms and Fields tab, and select in which forms which fields you want to receive in Telegram. The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything
+# 3) 1. Go to Telegram Notifier -> the Database Settings tab. 2. In the field Server Name, The default is localhost. If it doesn’t fit, go to phpMyAdmin, click on the house icon, and in the right corner there will be a block with the name "database server", in it, there is an item with the name "server", take the value from there 3. In the field User name, enter the database user name 4. In the field Password, enter password, which you set for this user. 5. In the field Database name, enter: database name
+
+# 4) Go to wp-admin -> plugin -> the Setting Forms and Fields tab, and select in which forms which fields you want to receive in Telegram. The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything
