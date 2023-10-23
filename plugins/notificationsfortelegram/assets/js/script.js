@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function sendData(data) {
         try {
-            const response = await fetch('/plugins/telegramnotifier/telegramnotifier.php', {
+            await fetch('/plugins/notificationsfortelegram/notificationsfortelegram.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

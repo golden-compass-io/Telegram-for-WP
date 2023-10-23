@@ -1,6 +1,6 @@
 <?php
-/* Plugin name: telegram notifier 
-* Description: The "telegram notifier" plugin is a powerful tool that helps you quickly process requests and respond to orders. In this way, you ensure a high level of service and convenience for your audience.
+/* Plugin name: Notifications for telegram 
+* Description: The "Notifications for telegram" plugin is a powerful tool that helps you quickly process requests and respond to orders. In this way, you ensure a high level of service and convenience for your audience.
 * Version: 1.0
 * Author: Golden Compass
 * Author URI: https://goldencompass.io/

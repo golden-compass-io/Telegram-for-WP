@@ -1,4 +1,4 @@
-=== telegram notifier ===
+=== Notifications for telegram ===
 Contributors: golden compass
 Tags: bot, form, телеграм, telegram, notification, сповіщення, уведомления, телеграм сповіщення, телеграм уведомления, telegram notification, woocommerce, woocomerce, wocomerce;
 Requires PHP: 8.2.7
@@ -12,7 +12,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-The "telegram notifier" plugin is a powerful tool that helps you quickly process requests and respond to orders. In this way, you ensure a high level of service and convenience for your audience.
+The "Notifications for telegram" plugin is a powerful tool that helps you quickly process requests and respond to orders. In this way, you ensure a high level of service and convenience for your audience.
 
 **Main features:**
 
@@ -27,7 +27,7 @@ The "telegram notifier" plugin is a powerful tool that helps you quickly process
 
 1. Install the plugin through the WordPress plugins screen directly,
 2. Activate the plugin through the 'Plugins' screen in WordPress
-3. You will find all information about plugin settings in Admin sidebar menu -> Telegram Notifier
+3. You will find all information about plugin settings in Admin sidebar menu -> Notifications for telegram
 
 
 == Screenshots ==

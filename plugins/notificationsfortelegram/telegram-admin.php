@@ -1,8 +1,7 @@
 <?php
-    // Додаємо пункт меню 'Telegram Bot'
     add_action('admin_menu', 'register_telegram_bot_menu');
     function register_telegram_bot_menu(){
-        add_menu_page('Telegram Notifier', 'Telegram Notifier', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
+        add_menu_page('Notifications for telegram', 'Notifications for telegram', 'manage_options', 'telegram_bot_settings', 'telegram_bot_plugin_settings_callback', plugins_url( 'assets/images/bot.png', __FILE__ ));
         add_submenu_page('telegram_bot_settings', 'Telegram Bot Settings', 'Telegram Bot Settings', 'manage_options', 'telegram_bot_general_settings', 'telegram_bot_settings_general_page');
         add_submenu_page('telegram_bot_settings', 'Database Settings', 'Database Settings', 'manage_options', 'telegram_bot_database_settings', 'telegram_bot_settings_database_page');
         add_submenu_page('telegram_bot_settings', 'Setting Forms and Fields', 'Setting Forms and Fields', 'manage_options', 'telegram_bot_field_settings', 'telegram_bot_field_settings_page');
@@ -30,19 +29,19 @@
             <ol>
                 <li>Add class <b>form__title</b> to the tag from which the name of your form will be taken</li>
                 <li>Paste this code in themes -> your theme folder -> functions.php
-                <pre><code>function enqueue_telegramnotifier_script() {
-    $plugin_script_url = plugins_url( 'telegramnotifier/assets/js/script.js' );
+                <pre><code>function enqueue_notificationsfortelegram_script() {
+    $plugin_script_url = plugins_url( 'notificationsfortelegram/assets/js/script.js' );
     
-    wp_register_script( 'telegramnotifier-script', $plugin_script_url, array(), '1.0', true );
-    wp_enqueue_script( 'telegramnotifier-script' );
+    wp_register_script( 'notificationsfortelegram-script', $plugin_script_url, array(), '1.0', true );
+    wp_enqueue_script( 'notificationsfortelegram-script' );
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></pre>
+add_action( 'wp_enqueue_scripts', 'enqueue_notificationsfortelegram_script' ); </code></pre>
                 </li>
             </ol>
 
             <h2 class="readmy__title">Database Settings tab</h2>
                 <ol>
-                    <li>Go to Telegram Notifier -> the Database Settings tab</li>
+                    <li>Go to Notifications for telegram -> the Database Settings tab</li>
                     <li>In the field Server Name, The default is <code>localhost</code>. If it doesn’t fit, go to phpMyAdmin, click on the house icon, and in the right corner there will be a block with the name "database server", in it, there is an item with the name "server", take the value from there</li>
                     <li>In the field User name, enter the database user name.</li>
                     <li>In the field Password, enter password, which you set for this user.</li>
@@ -51,7 +50,7 @@ add_action( 'wp_enqueue_scripts', 'enqueue_telegramnotifier_script' ); </code></
 
             <h2 class="readmy__title">Setting Forms and Fields tab</h2>
                 <ol>
-                    <li>Go to Telegram Notifier -> the Setting Forms and Fields tab</li>
+                    <li>Go to Notifications for telegram -> the Setting Forms and Fields tab</li>
                     <li>Select in which forms which fields you want to receive in Telegram</li>
                     <div><span style="color: #D50000; margin-left:-16px">!!!</span> The name of the fields is extracted from the name attribute in the input, if they are not there, you will not see anything <span  style="color: #D50000;">!!!</span></div>
                 </ol> 
