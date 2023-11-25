@@ -197,114 +197,108 @@ add_action( 'wp_enqueue_scripts', 'enqueue_notificationsfortelegram_script' ); <
 
     // -----------------Для полей ----------
 
-    function my_plugin_field_settings_callback() {
-
-        $theme_folder = get_template_directory();
-        $selected_fields = get_option('my_plugin_settings_field', array());
-        $php_files = scandir($theme_folder);
-
-        foreach ($php_files as $php_file) {
-            $file_path = $theme_folder . '/' . $php_file;
-        
-            if (pathinfo($php_file, PATHINFO_EXTENSION) === 'php') {
-                $form_html = file_get_contents($file_path);
-        
+    function findFormsInFile($file_path, &$forms) {
+        if (pathinfo($file_path, PATHINFO_EXTENSION) === 'php') {
+            $form_html = file_get_contents($file_path);
+    
+            if (!empty($form_html)) {
                 $dom = new DOMDocument();
                 @$dom->loadHTML($form_html);
-        
-                $xpath = new DOMXPath($dom);
-                $forms = $xpath->query("//form");
-
-                $i = 0;
-                foreach ($forms as $form) {
-                    $title = $xpath->query(".//*[contains(@class, 'form__title')]", $form);
-                    $price = $xpath->query(".//*[contains(@class, 'order-total')]", $form);
-                    $products = $xpath->query(".//*[contains(@class, 'product-name')]", $form);
-
-                    if ($title->length > 0) {
-                        $form_name = $title->item(0)->textContent;
+    
+                if ($dom) {
+                    $xpath = new DOMXPath($dom);
+                    $formNodes = $xpath->query("//form");
+    
+                    foreach ($formNodes as $formNode) {
+                        $forms[] = $formNode;
                     }
-                   
-                    $is_form_checked = in_array($form_name, $selected_fields) ? 'checked' : '';
-                    $is_form_checked_attribute = $is_form_checked === 'checked' ? 'checked' : '';
-
-                    ?>
-                    <div class="mainWrapper">
-                        <input class="parentCheckbox" style="margin-bottom: 5px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($form_name); ?>" <?php echo $is_form_checked_attribute; ?> />
-                        <label style="font-size: 15px; margin-bottom: 10px; display: inline-block;"><strong><?php echo 'Form: ' . esc_html($form_name); ?></strong></label><br>
-
-                        <?php
-
-                        if ($price->length > 0) {
-                            $price_name = 'total_price';
-                            $dynamic_price_name = $price_name . "_$i"; // Додайте динамічний індекс
-                            $is_price_checked = in_array($dynamic_price_name, $selected_fields) ? 'checked' : '';
-                            if($is_form_checked == ''){
-                                ?>
-                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_price_name); ?>" <?php echo $is_price_checked; ?>/> total price<br>
-                                <?php
-                            }else{
-                                ?>
-                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_price_name); ?>" <?php echo $is_price_checked; ?>/> total price<br>
-                                <?php
-                            } 
-                        }
-
-                        if ($products->length > 0) {
-                            $products= 'products';
-                            $dynamic_products = $products. "_$i"; // Додайте динамічний індекс
-                            $is_field_checked = in_array($dynamic_products, $selected_fields) ? 'checked' : '';
-                            if($is_form_checked == ''){
-
-                                ?>
-                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_products); ?>" <?php echo $is_field_checked; ?>/> products<br>
-                                <?php
-                            }else{
-                                ?>
-                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_products); ?>" <?php echo $is_field_checked; ?>/> products<br>
-                                <?php
-                            } 
-                        }
-
-                        $inputs = $xpath->query(".//input[@name]", $form);
-                        foreach ($inputs as $input) {
-                            $input_name = $input->getAttribute('name');
-                            $dynamic_input_name = $input_name . "_$i"; 
-                            $is_input_checked = in_array($dynamic_input_name, $selected_fields) ? 'checked' : '';
-
-                            if ($is_form_checked == '') {
-                                ?>
-                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
-                                <?php
-                            } else {
-                                ?>
-                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
-                                <?php
-                            }
-                        }
-
-                        $textareas = $xpath->query(".//textarea[@name]", $form);
-                        foreach ($textareas as $textarea) {
-                            $textarea_name = $textarea->getAttribute('name');
-                            $dynamic_textarea_name = $textarea_name . "_$i"; 
-                            $is_textarea_checked = in_array($dynamic_textarea_name, $selected_fields) ? 'checked' : '';
-                            if($is_form_checked == ''){
-                                ?>
-                                <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
-                                <?php
-                            }else{
-                                ?>
-                                <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
-                                <?php
-                            }
-                        }
-                    ?>
-                    </div>
-                    <br><br>
-                    <?php
-                    $i++;
                 }
+            }
+        }
+    }
+    
+    function findFormsInDirectory($dir, &$forms) {
+        $files = scandir($dir);
+    
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') {
+                $file_path = $dir . '/' . $file;
+    
+                if (is_dir($file_path)) {
+                    findFormsInDirectory($file_path, $forms);
+                } else {
+                    findFormsInFile($file_path, $forms);
+                }
+            }
+        }
+    }
 
+    function my_plugin_field_settings_callback() {
+        $theme_folder = get_template_directory();
+        $selected_fields = get_option('my_plugin_settings_field', array());
+    
+        $all_forms = array();
+        findFormsInDirectory($theme_folder, $all_forms);
+    
+        $i = 0;
+    
+        foreach ($all_forms as $form) {
+            $formNode = new DOMDocument();
+            $formNode->appendChild($formNode->importNode($form, true));
+    
+            $formXPath = new DOMXPath($formNode);
+            $titles = $formXPath->query("//*[contains(@class, 'form__title')]");
+    
+            foreach ($titles as $title) {
+                $form_name = $title->textContent;
+    
+                $is_form_checked = in_array($form_name, $selected_fields) ? 'checked' : '';
+                $is_form_checked_attribute = $is_form_checked === 'checked' ? 'checked' : '';
+    
+                ?>
+                <div class="mainWrapper">
+                    <input class="parentCheckbox" style="margin-bottom: 5px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($form_name); ?>" <?php echo $is_form_checked_attribute; ?> />
+                    <label style="font-size: 15px; margin-bottom: 10px; display: inline-block;"><strong><?php echo 'Form: ' . esc_html($form_name); ?></strong></label><br>
+    
+                    <?php
+    
+                    $inputs = $formXPath->query(".//input[@name]");
+                    foreach ($inputs as $input) {
+                        $input_name = $input->getAttribute('name');
+                        $dynamic_input_name = $input_name . "_$i"; 
+                        $is_input_checked = in_array($dynamic_input_name, $selected_fields) ? 'checked' : '';
+    
+                        if ($is_form_checked == '') {
+                            ?>
+                            <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                            <?php
+                        } else {
+                            ?>
+                            <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_input_name); ?>" <?php echo $is_input_checked; ?> /> <?php echo esc_html($input_name); ?><br>
+                            <?php
+                        }
+                    }
+    
+                    $textareas = $formXPath->query(".//textarea[@name]");
+                    foreach ($textareas as $textarea) {
+                        $textarea_name = $textarea->getAttribute('name');
+                        $dynamic_textarea_name = $textarea_name . "_$i"; 
+                        $is_textarea_checked = in_array($dynamic_textarea_name, $selected_fields) ? 'checked' : '';
+                        if($is_form_checked == ''){
+                            ?>
+                            <input disabled class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
+                            <?php
+                        }else{
+                            ?>
+                            <input class="childCheckbox" style="margin-left: 20px;" type="checkbox" name="my_plugin_settings_field[]" value="<?php echo esc_attr($dynamic_textarea_name); ?>" <?php echo $is_textarea_checked; ?> /> <?php echo esc_html($textarea_name); ?><br>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+                <br><br>
+                <?php
+                $i++;
             }
         }
     }
